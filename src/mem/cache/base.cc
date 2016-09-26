@@ -67,23 +67,23 @@ BaseCache::CacheSlavePort::CacheSlavePort(const std::string &_name,
 }
 
 BaseCache::BaseCache(const BaseCacheParams *p, unsigned blk_size)
-    : MemObject(p),
-      cpuSidePort(nullptr), memSidePort(nullptr),
+    : MemObject(p), //所有的Object都来源于memObject
+      cpuSidePort(nullptr), memSidePort(nullptr), //CPU和memory的端口声明
       mshrQueue("MSHRs", p->mshrs, 0, p->demand_mshr_reserve), // see below
       writeBuffer("write buffer", p->write_buffers, p->mshrs), // see below
-      blkSize(blk_size),
-      lookupLatency(p->hit_latency),
-      forwardLatency(p->hit_latency),
-      fillLatency(p->response_latency),
-      responseLatency(p->response_latency),
-      numTarget(p->tgts_per_mshr),
-      forwardSnoops(true),
+      blkSize(blk_size), //block_size 块的大小
+      lookupLatency(p->hit_latency), //查询延时
+      forwardLatency(p->hit_latency), //转发延时
+      fillLatency(p->response_latency), //填充延时
+      responseLatency(p->response_latency), //响应延时
+      numTarget(p->tgts_per_mshr), //
+      forwardSnoops(true), //
       isReadOnly(p->is_read_only),
       blocked(0),
       order(0),
       noTargetMSHR(nullptr),
-      missCount(p->max_miss_count),
-      addrRanges(p->addr_ranges.begin(), p->addr_ranges.end()),
+      missCount(p->max_miss_count), //对miss进行计数
+      addrRanges(p->addr_ranges.begin(), p->addr_ranges.end()), //给定address range，指定地址初始地址和结束的地址
       system(p->system)
 {
     // the MSHR queue has no reserve entries as we check the MSHR
@@ -97,7 +97,7 @@ BaseCache::BaseCache(const BaseCacheParams *p, unsigned blk_size)
 }
 
 void
-BaseCache::CacheSlavePort::setBlocked()
+BaseCache::CacheSlavePort::setBlocked() /*Block 处于忙碌状态，若调度了一个entry，则取消*/
 {
     assert(!blocked);
     DPRINTF(CachePort, "Port is blocking new requests\n");
@@ -112,7 +112,7 @@ BaseCache::CacheSlavePort::setBlocked()
 }
 
 void
-BaseCache::CacheSlavePort::clearBlocked()
+BaseCache::CacheSlavePort::clearBlocked() /*Block 处于空闲状态，可以接受新的请求*/
 {
     assert(blocked);
     DPRINTF(CachePort, "Port is accepting new requests\n");
@@ -124,7 +124,7 @@ BaseCache::CacheSlavePort::clearBlocked()
 }
 
 void
-BaseCache::CacheSlavePort::processSendRetry()
+BaseCache::CacheSlavePort::processSendRetry() /*处理发送Retry的函数，发送Retry请求*/
 {
     DPRINTF(CachePort, "Port is sending retry\n");
 
@@ -134,12 +134,12 @@ BaseCache::CacheSlavePort::processSendRetry()
 }
 
 void
-BaseCache::init()
+BaseCache::init() /*BaseCache的初始化*/
 {
     if (!cpuSidePort->isConnected() || !memSidePort->isConnected())
         fatal("Cache ports on %s are not connected\n", name());
-    cpuSidePort->sendRangeChange();
-    forwardSnoops = cpuSidePort->isSnooping();
+    cpuSidePort->sendRangeChange(); //cpuSidePort发送cache范围
+    forwardSnoops = cpuSidePort->isSnooping(); 
 }
 
 BaseMasterPort &
