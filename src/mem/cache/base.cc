@@ -143,7 +143,7 @@ BaseCache::init() /*BaseCache的初始化*/
 }
 
 BaseMasterPort &
-BaseCache::getMasterPort(const std::string &if_name, PortID idx)
+BaseCache::getMasterPort(const std::string &if_name, PortID idx) /*主端口*/
 {
     if (if_name == "mem_side") {
         return *memSidePort;
@@ -153,7 +153,7 @@ BaseCache::getMasterPort(const std::string &if_name, PortID idx)
 }
 
 BaseSlavePort &
-BaseCache::getSlavePort(const std::string &if_name, PortID idx)
+BaseCache::getSlavePort(const std::string &if_name, PortID idx) /*从端口*/
 {
     if (if_name == "cpu_side") {
         return *cpuSidePort;
@@ -163,7 +163,7 @@ BaseCache::getSlavePort(const std::string &if_name, PortID idx)
 }
 
 bool
-BaseCache::inRange(Addr addr) const
+BaseCache::inRange(Addr addr) const /*判断地址是否在这个范围内，在，为True; 不在，为False*/
 {
     for (const auto& r : addrRanges) {
         if (r.contains(addr)) {
@@ -174,7 +174,7 @@ BaseCache::inRange(Addr addr) const
 }
 
 void
-BaseCache::regStats()
+BaseCache::regStats() /*在BaseCache的子类regStats里说明的hit发生时的具体操作*/
 {
     MemObject::regStats();
 
@@ -227,10 +227,10 @@ BaseCache::regStats()
         overallHits.subname(i, system->getMasterName(i));
     }
 
-    // Miss statistics
+    // Miss statistics对miss的统计
     for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {
         MemCmd cmd(access_idx);
-        const string &cstr = cmd.toString();
+        const string &cstr = cmd.toString(); //cstr可以将数值型变成字符型
 
         misses[access_idx]
             .init(system->maxMasters())
